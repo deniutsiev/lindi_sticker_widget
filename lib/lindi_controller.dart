@@ -270,24 +270,4 @@ class LindiController extends ChangeNotifier {
     rnd = Random();
     return min + rnd.nextInt(max - min);
   }
-
-  Matrix4? getMatrixForKey(Key key) => matrixMap[key];
-
-  Offset? getTranslationForKey(Key key) {
-    final m = matrixMap[key];
-    if (m == null) return null;
-    return Offset(m[12], m[13]);
-  }
-
-  double? getRotationForKey(Key key) {
-    final m = matrixMap[key];
-    if (m == null) return null;
-    return atan2(m[1], m[0]);
-  }
-
-  double? getScaleForKey(Key key) {
-    final m = matrixMap[key];
-    if (m == null) return null;
-    return sqrt(m[0] * m[0] + m[1] * m[1]);
-  }
 }

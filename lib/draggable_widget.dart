@@ -144,6 +144,14 @@ class DraggableWidget extends StatelessWidget {
     _onDelete(key);
   }
 
+  Matrix4 getRotation() {
+    return _notifier.value;
+  }
+
+  double? getScale() {
+    return _scale;
+  }
+
   // Method to stack, change position.
   stack() {
     _onLayer(key);
@@ -186,7 +194,6 @@ class DraggableWidget extends StatelessWidget {
             onUpdate: (s, m) {
               _scale = s;
               _notifier.value = m;
-              onMatrixUpdate!(m);
             },
             child: Builder(builder: (context) {
               _gestureDetectorState =
