@@ -69,27 +69,29 @@ class DraggableWidget extends StatelessWidget {
   final ValueNotifier<Matrix4> _notifier = ValueNotifier(Matrix4.identity());
   final ValueNotifier<bool> _updater = ValueNotifier(true);
 
+  final Function(Matrix4)? onMatrixUpdate;
+
   GlobalKey centerKey = GlobalKey();
 
   /// Constructor to initialize the widget's properties.
   ///
   DraggableWidget(
       {super.key,
-      required icons,
-      required this.child,
-      required position,
-      required borderColor,
-      required borderWidth,
-      required showBorders,
-      required shouldMove,
-      required shouldRotate,
-      required shouldScale,
-      required minScale,
-      required maxScale,
-      required onBorder,
-      required onDelete,
-      required onLayer,
-      required insidePadding}) {
+        required icons,
+        required this.child,
+        required position,
+        required borderColor,
+        required borderWidth,
+        required showBorders,
+        required shouldMove,
+        required shouldRotate,
+        required shouldScale,
+        required minScale,
+        required maxScale,
+        required onBorder,
+        required onDelete,
+        required onLayer,
+        required insidePadding, this.onMatrixUpdate}) {
     _icons = icons;
     _position = position;
     _borderColor = borderColor;
@@ -184,10 +186,11 @@ class DraggableWidget extends StatelessWidget {
             onUpdate: (s, m) {
               _scale = s;
               _notifier.value = m;
+              onMatrixUpdate!(m);
             },
             child: Builder(builder: (context) {
               _gestureDetectorState =
-                  context.findAncestorStateOfType<LindiGestureDetectorState>()!;
+              context.findAncestorStateOfType<LindiGestureDetectorState>()!;
               return AnimatedBuilder(
                 animation: _notifier,
                 builder: (ctx, child) {
@@ -204,10 +207,10 @@ class DraggableWidget extends StatelessWidget {
                             padding: EdgeInsets.all(_insidePadding / _scale),
                             decoration: (_showBorders && _showBorder)
                                 ? BoxDecoration(
-                                    border: Border.all(
-                                        color: _borderColor,
-                                        width: _borderWidth / _scale),
-                                  )
+                              border: Border.all(
+                                  color: _borderColor,
+                                  width: _borderWidth / _scale),
+                            )
                                 : null,
                             child: FittedBox(
                               fit: BoxFit.contain,
@@ -247,13 +250,13 @@ class DraggableWidget extends StatelessWidget {
                                         height: circleSize,
                                         child: CircleAvatar(
                                             backgroundColor:
-                                                icon.backgroundColor,
+                                            icon.backgroundColor,
                                             child: Icon(
                                               (isLock &&
-                                                      icon.lockedIcon != null)
+                                                  icon.lockedIcon != null)
                                                   ? _isLock
-                                                      ? icon.lockedIcon
-                                                      : icon.icon
+                                                  ? icon.lockedIcon
+                                                  : icon.icon
                                                   : icon.icon,
                                               size: icon.iconSize,
                                               color: icon.iconColor,
@@ -271,10 +274,10 @@ class DraggableWidget extends StatelessWidget {
                   );
                   return _isUpdating
                       ? Container(
-                          color: Colors.transparent,
-                          width: double.infinity,
-                          height: double.infinity,
-                          child: transformChild)
+                      color: Colors.transparent,
+                      width: double.infinity,
+                      height: double.infinity,
+                      child: transformChild)
                       : transformChild;
                 },
               );

@@ -18,6 +18,8 @@ enum IconType { lock, resize, other }
 /// used for managing a list of draggable widgets and their properties.
 ///
 class LindiController extends ChangeNotifier {
+  Map<Key, Matrix4> matrixMap = {};
+
   /// List to store draggable widgets.
   ///
   List<DraggableWidget> widgets = [];
@@ -91,15 +93,15 @@ class LindiController extends ChangeNotifier {
   ///
   LindiController(
       {required this.icons,
-      this.borderColor = Colors.white,
-      this.borderWidth = 1.5,
-      this.showBorders = true,
-      this.shouldMove = true,
-      this.shouldRotate = true,
-      this.shouldScale = true,
-      this.minScale = 0.5,
-      this.maxScale = 4,
-      this.insidePadding = 13}) {
+        this.borderColor = Colors.white,
+        this.borderWidth = 1.5,
+        this.showBorders = true,
+        this.shouldMove = true,
+        this.shouldRotate = true,
+        this.shouldScale = true,
+        this.minScale = 0.5,
+        this.maxScale = 4,
+        this.insidePadding = 13}) {
     onPositionChange();
   }
 
@@ -113,28 +115,32 @@ class LindiController extends ChangeNotifier {
 
     // Create a DraggableWidget with specified properties.
     widgets.add(DraggableWidget(
-        key: key,
-        icons: icons,
-        borderColor: borderColor,
-        borderWidth: borderWidth,
-        showBorders: showBorders,
-        shouldMove: shouldMove,
-        shouldRotate: shouldRotate,
-        shouldScale: shouldScale,
-        minScale: minScale,
-        maxScale: maxScale,
-        insidePadding: insidePadding,
-        position: _ensureWithinBounds(position),
-        onBorder: (key) {
-          _border(key);
-        },
-        onDelete: (key) {
-          _delete(key);
-        },
-        onLayer: (key) {
-          _layer(key);
-        },
-        child: widget));
+      key: key,
+      icons: icons,
+      borderColor: borderColor,
+      borderWidth: borderWidth,
+      showBorders: showBorders,
+      shouldMove: shouldMove,
+      shouldRotate: shouldRotate,
+      shouldScale: shouldScale,
+      minScale: minScale,
+      maxScale: maxScale,
+      insidePadding: insidePadding,
+      position: _ensureWithinBounds(position),
+      onBorder: (key) {
+        _border(key);
+      },
+      onDelete: (key) {
+        _delete(key);
+      },
+      onLayer: (key) {
+        _layer(key);
+      },
+      onMatrixUpdate: (newMatrix) {
+        matrixMap[key] = newMatrix;
+      },
+      child: widget,
+    ));
 
     // Highlight the border of the added widget.
     _border(key);
@@ -209,7 +215,7 @@ class LindiController extends ChangeNotifier {
   // Method to change the layering of a widget.
   _layer(key) {
     int index =
-        widgets.indexOf(widgets.firstWhere((element) => element.key == key));
+    widgets.indexOf(widgets.firstWhere((element) => element.key == key));
     if (index > 0) {
       DraggableWidget item = widgets.removeAt(index);
       _currentIndex = index - 1;
@@ -230,11 +236,11 @@ class LindiController extends ChangeNotifier {
           .then((value) async {
         // Capture the image of the widget.
         RenderRepaintBoundary boundary =
-            LindiStickerWidget.globalKey.currentContext?.findRenderObject()
-                as RenderRepaintBoundary;
+        LindiStickerWidget.globalKey.currentContext?.findRenderObject()
+        as RenderRepaintBoundary;
         ui.Image image = await boundary.toImage(pixelRatio: pixelRatio);
         ByteData? byteData =
-            await image.toByteData(format: ui.ImageByteFormat.png);
+        await image.toByteData(format: ui.ImageByteFormat.png);
         pngBytes = byteData?.buffer.asUint8List();
       });
       return pngBytes;
@@ -263,5 +269,25 @@ class LindiController extends ChangeNotifier {
     int max = 100000;
     rnd = Random();
     return min + rnd.nextInt(max - min);
+  }
+
+  Matrix4? getMatrixForKey(Key key) => matrixMap[key];
+
+  Offset? getTranslationForKey(Key key) {
+    final m = matrixMap[key];
+    if (m == null) return null;
+    return Offset(m[12], m[13]);
+  }
+
+  double? getRotationForKey(Key key) {
+    final m = matrixMap[key];
+    if (m == null) return null;
+    return atan2(m[1], m[0]);
+  }
+
+  double? getScaleForKey(Key key) {
+    final m = matrixMap[key];
+    if (m == null) return null;
+    return sqrt(m[0] * m[0] + m[1] * m[1]);
   }
 }
