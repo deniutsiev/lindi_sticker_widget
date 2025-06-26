@@ -70,7 +70,7 @@ class DraggableWidget extends StatelessWidget {
   final ValueNotifier<bool> _updater = ValueNotifier(true);
 
   final Function(Matrix4)? onMatrixUpdate;
-  late Matrix4 _finalMatrix;
+  final Matrix4 _finalMatrix = Matrix4.identity();
 
   GlobalKey centerKey = GlobalKey();
 
@@ -192,6 +192,7 @@ class DraggableWidget extends StatelessWidget {
               _scale = s;
               _notifier.value = m;
               _finalMatrix.setFrom(m);
+              debugPrint('Updated Matrix: ${m.storage}');
             },
             child: Builder(builder: (context) {
               _gestureDetectorState =
