@@ -70,6 +70,7 @@ class DraggableWidget extends StatelessWidget {
   final ValueNotifier<bool> _updater = ValueNotifier(true);
 
   final Function(Matrix4)? onMatrixUpdate;
+  late Matrix4 _finalMatrix;
 
   GlobalKey centerKey = GlobalKey();
 
@@ -144,13 +145,9 @@ class DraggableWidget extends StatelessWidget {
     _onDelete(key);
   }
 
-  Matrix4 getRotation() {
-    return _notifier.value;
-  }
+  Matrix4 getRotation() => _finalMatrix.clone();
 
-  double? getScale() {
-    return _scale;
-  }
+  double? getScale() => _scale;
 
   // Method to stack, change position.
   stack() {
@@ -194,6 +191,7 @@ class DraggableWidget extends StatelessWidget {
             onUpdate: (s, m) {
               _scale = s;
               _notifier.value = m;
+              _finalMatrix.setFrom(m);
             },
             child: Builder(builder: (context) {
               _gestureDetectorState =
